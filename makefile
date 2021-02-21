@@ -14,4 +14,4 @@ coverage:
 
 .PHONY: install
 install: bin/git-cc
-	@cp bin/git-cc /usr/local/bin/git-cc
+	@cp bin/git-cc /usr/bin/git-cc
