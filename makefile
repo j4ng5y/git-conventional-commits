@@ -3,6 +3,7 @@ all: test build
 .PHONY: test
 test:
 	@go test --coverprofile=coverage.out ./...
+
 .PHONY: build
 build:
 	@go build -a -o bin/git-cc cmd/cc/git-cc.go

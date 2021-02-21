@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 
@@ -91,7 +92,7 @@ func writeTemplate(types map[string]string) (err error) {
 		return fmt.Errorf("git appears to be uninitialized, please initialize git first")
 	}
 
-	f, err := os.OpenFile(".git/hooks/commit-msg.txt", os.O_CREATE|os.O_RDWR|os.O_TRUNC, 0700)
+	f, err := os.OpenFile(filepath.Join(".git", "hooks", "commit-msg.txt"), os.O_CREATE|os.O_RDWR|os.O_TRUNC, 0700)
 	if err != nil {
 		return err
 	}
@@ -99,6 +100,11 @@ func writeTemplate(types map[string]string) (err error) {
 
 	_, err = f.WriteString(tmpl)
 	return err
+}
+
+func setTemplateForRepo() (err error) {
+	cmd := exec.Command("git", "config", "commit.template", filepath.Join(".git", "hooks", "commit-msg.txt"))
+	return cmd.Run()
 }
 
 func InitCMD(ccmd *cobra.Command, args []string) {
@@ -133,8 +139,16 @@ Please enter your choice: `)
 			"test":        "writing or enhancing tests",
 			"improvement": "changes to existing production code",
 		}
-		writeConfig(types)
-		writeTemplate(types)
+		if err := writeConfig(types); err != nil {
+			log.Fatal(err)
+		}
+		if err := writeTemplate(types); err != nil {
+			log.Fatal(err)
+		}
+		if err := setTemplateForRepo(); err != nil {
+			log.Fatal(err)
+		}
+
 	case 2:
 		var types = make(map[string]string)
 		cont := true
@@ -178,6 +192,9 @@ Please enter your choice: `)
 			log.Fatal(err)
 		}
 		if err := writeTemplate(types); err != nil {
+			log.Fatal(err)
+		}
+		if err := setTemplateForRepo(); err != nil {
 			log.Fatal(err)
 		}
 
